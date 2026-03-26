@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SuperAdmin Panel</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --card: #111827;
+        --muted: #94a3b8;
+        --text: #e2e8f0;
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --danger: #dc2626;
+        --success: #16a34a;
+        --border: #1f2937;
+      }
+
+      * {
+        box-sizing: border-box;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: linear-gradient(180deg, #020617, #0f172a 35%);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      .container {
+        width: min(1200px, 95vw);
+        margin: 0 auto;
+        padding: 1rem;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .card {
+        background: rgba(17, 24, 39, 0.95);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 1rem;
+        box-shadow: 0 10px 25px rgba(2, 6, 23, 0.45);
+      }
+
+      h1, h2, h3 {
+        margin-top: 0;
+      }
+
+      .login-wrap {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+      }
+
+      .login-card {
+        width: min(460px, 94vw);
+      }
+
+      .grid {
+        display: grid;
+        gap: 0.8rem;
+      }
+
+      .two-cols {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      label {
+        font-size: 0.88rem;
+        color: #cbd5e1;
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        margin-top: 0.35rem;
+        border: 1px solid #334155;
+        background: #0b1220;
+        color: var(--text);
+        border-radius: 10px;
+        padding: 0.65rem 0.75rem;
+        outline: none;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      }
+
+      .btn {
+        border: 0;
+        border-radius: 10px;
+        padding: 0.65rem 0.85rem;
+        cursor: pointer;
+        color: white;
+        background: var(--primary);
+        font-weight: 600;
+      }
+
+      .btn:hover {
+        background: var(--primary-hover);
+      }
+
+      .btn-secondary {
+        background: #334155;
+      }
+
+      .btn-danger {
+        background: var(--danger);
+      }
+
+      .btn-success {
+        background: var(--success);
+      }
+
+      .btn:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+      }
+
+      .tab-btn {
+        background: #1e293b;
+      }
+
+      .tab-btn.active {
+        background: var(--primary);
+      }
+
+      .message {
+        margin-top: 0.8rem;
+        border-radius: 10px;
+        padding: 0.7rem 0.75rem;
+        font-size: 0.92rem;
+      }
+
+      .message.error {
+        background: rgba(220, 38, 38, 0.15);
+        border: 1px solid rgba(220, 38, 38, 0.35);
+      }
+
+      .message.success {
+        background: rgba(22, 163, 74, 0.15);
+        border: 1px solid rgba(22, 163, 74, 0.35);
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 700px;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 0.65rem;
+        border-bottom: 1px solid #223045;
+        vertical-align: top;
+      }
+
+      th {
+        color: #cbd5e1;
+        font-size: 0.85rem;
+      }
+
+      .actions {
+        display: flex;
+        gap: 0.45rem;
+        flex-wrap: wrap;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+
+      .pill-active {
+        color: #22c55e;
+        background: rgba(34, 197, 94, 0.15);
+      }
+
+      .pill-inactive {
+        color: #f59e0b;
+        background: rgba(245, 158, 11, 0.15);
+      }
+
+      .section {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.7);
+        display: grid;
+        place-items: center;
+        padding: 1rem;
+      }
+
+      .modal {
+        width: min(520px, 95vw);
+      }
+
+      .otp-note {
+        font-size: 0.88rem;
+        color: var(--muted);
+      }
+
+      @media (max-width: 700px) {
+        .topbar {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        table {
+          min-width: 620px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loginView" class="login-wrap container">
+      <div class="card login-card">
+        <h1>SuperAdmin Panel</h1>
+        <p class="otp-note">Autenticación en dos pasos (JWT + OTP)</p>
+
+        <form id="loginForm" class="grid">
+          <div>
+            <label>Email
+              <input id="email" type="email" required placeholder="superadmin@company.com" />
+            </label>
+          </div>
+          <div>
+            <label>Password
+              <input id="password" type="password" required minlength="6" />
+            </label>
+          </div>
+          <button class="btn" type="submit">Solicitar OTP</button>
+        </form>
+
+        <form id="otpForm" class="grid hidden">
+          <div>
+            <label>Código OTP (6 dígitos)
+              <input id="otp" type="text" inputmode="numeric" pattern="\d{6}" minlength="6" maxlength="6" required />
+            </label>
+          </div>
+          <div class="otp-note" id="otpCountdown"></div>
+          <div class="actions">
+            <button class="btn" type="submit">Verificar y entrar</button>
+            <button class="btn btn-secondary" id="backToLoginBtn" type="button">Cambiar credenciales</button>
+          </div>
+        </form>
+
+        <div id="loginMessage" class="message hidden"></div>
+      </div>
+    </div>
+
+    <div id="appView" class="container hidden">
+      <div class="topbar">
+        <div>
+          <h2 style="margin:0">Dashboard SuperAdmin</h2>
+          <small id="apiInfo" style="color:#94a3b8"></small>
+        </div>
+        <div class="actions">
+          <button class="btn btn-secondary" id="refreshAllBtn" type="button">Refrescar datos</button>
+          <button class="btn btn-danger" id="logoutBtn" type="button">Cerrar sesión</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="btn tab-btn active" data-tab="admins" type="button">SuperAdmins</button>
+        <button class="btn tab-btn" data-tab="businesses" type="button">Businesses</button>
+      </div>
+
+      <div id="appMessage" class="message hidden"></div>
+
+      <section id="adminsSection" class="section">
+        <div class="card">
+          <h3>Crear SuperAdmin</h3>
+          <form id="createAdminForm" class="grid two-cols">
+            <label>Email
+              <input name="email" type="email" required />
+            </label>
+            <label>Nombre
+              <input name="name" type="text" required />
+            </label>
+            <label>Password
+              <input name="password" type="password" minlength="6" required />
+            </label>
+            <div style="display:flex;align-items:end">
+              <button class="btn" type="submit">Crear</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;gap:1rem;align-items:center">
+            <h3 style="margin:0">Lista de SuperAdmins</h3>
+            <button id="reloadAdminsBtn" class="btn btn-secondary" type="button">Recargar</button>
+          </div>
+          <div class="table-wrap" style="margin-top:0.8rem">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Email</th>
+                  <th>Nombre</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="adminsTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="businessesSection" class="section hidden">
+        <div class="card">
+          <h3>Crear Business</h3>
+          <form id="createBusinessForm" class="grid two-cols">
+            <label>Nombre
+              <input name="name" required />
+            </label>
+            <label>Slug
+              <input name="slug" required />
+            </label>
+            <label>Tipo
+              <input name="type" required placeholder="RESTAURANT, SALON, etc" />
+            </label>
+            <label>Teléfono
+              <input name="phone" />
+            </label>
+            <label style="grid-column:1/-1">Dirección
+              <input name="address" />
+            </label>
+            <label style="grid-column:1/-1">Descripción
+              <textarea name="description" rows="2"></textarea>
+            </label>
+            <div style="display:flex;align-items:end">
+              <button class="btn" type="submit">Crear Business</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;gap:1rem;align-items:center">
+            <h3 style="margin:0">Businesses</h3>
+            <button id="reloadBusinessesBtn" class="btn btn-secondary" type="button">Recargar</button>
+          </div>
+          <div class="table-wrap" style="margin-top:0.8rem">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Slug</th>
+                  <th>Tipo</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="businessesTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div id="businessModal" class="modal-backdrop hidden">
+      <div class="card modal">
+        <h3 id="businessModalTitle">Editar business</h3>
+        <form id="editBusinessForm" class="grid">
+          <input type="hidden" name="id" />
+          <label>Nombre
+            <input name="name" />
+          </label>
+          <label>Tipo
+            <input name="type" />
+          </label>
+          <label>Teléfono
+            <input name="phone" />
+          </label>
+          <label>Dirección
+            <input name="address" />
+          </label>
+          <label>Descripción
+            <textarea name="description" rows="3"></textarea>
+          </label>
+          <div class="actions">
+            <button class="btn" type="submit">Guardar cambios</button>
+            <button id="closeBusinessModalBtn" class="btn btn-secondary" type="button">Cerrar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="businessAdminModal" class="modal-backdrop hidden">
+      <div class="card modal">
+        <h3>Crear admin del business</h3>
+        <form id="createBusinessAdminForm" class="grid">
+          <input type="hidden" name="businessId" />
+          <label>Email
+            <input name="email" type="email" required />
+          </label>
+          <label>Nombre
+            <input name="firstName" required />
+          </label>
+          <label>Apellido
+            <input name="lastName" required />
+          </label>
+          <label>Password
+            <input name="password" type="password" minlength="6" required />
+          </label>
+          <div class="actions">
+            <button class="btn" type="submit">Crear Admin</button>
+            <button id="closeBusinessAdminModalBtn" class="btn btn-secondary" type="button">Cerrar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // Configuración principal
+      const API_BASE_URL = "http://localhost:8080";
+
+      const state = {
+        token: sessionStorage.getItem("sa_token") || "",
+        challengeId: "",
+        otpExpiresAt: 0,
+        otpTimer: null,
+        activeTab: "admins",
+      };
+
+      const loginView = document.getElementById("loginView");
+      const appView = document.getElementById("appView");
+      const loginMessage = document.getElementById("loginMessage");
+      const appMessage = document.getElementById("appMessage");
+      const loginForm = document.getElementById("loginForm");
+      const otpForm = document.getElementById("otpForm");
+      const otpCountdown = document.getElementById("otpCountdown");
+      const apiInfo = document.getElementById("apiInfo");
+
+      apiInfo.textContent = `API: ${API_BASE_URL}`;
+
+      function showMessage(target, text, type = "error") {
+        target.textContent = text;
+        target.className = `message ${type}`;
+        target.classList.remove("hidden");
+      }
+
+      function hideMessage(target) {
+        target.classList.add("hidden");
+        target.textContent = "";
+      }
+
+      function parseJwtExp(token) {
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          return payload.exp ? payload.exp * 1000 : 0;
+        } catch {
+          return 0;
+        }
+      }
+
+      function saveToken(token) {
+        state.token = token;
+        sessionStorage.setItem("sa_token", token);
+      }
+
+      function clearSession() {
+        state.token = "";
+        state.challengeId = "";
+        state.otpExpiresAt = 0;
+        if (state.otpTimer) {
+          clearInterval(state.otpTimer);
+          state.otpTimer = null;
+        }
+        sessionStorage.removeItem("sa_token");
+      }
+
+      function goToLogin(message = "") {
+        clearSession();
+        appView.classList.add("hidden");
+        loginView.classList.remove("hidden");
+        otpForm.classList.add("hidden");
+        loginForm.classList.remove("hidden");
+        if (message) {
+          showMessage(loginMessage, message, "error");
+        } else {
+          hideMessage(loginMessage);
+        }
+      }
+
+      async function apiRequest(path, options = {}) {
+        const headers = {
+          "Content-Type": "application/json",
+          ...(options.headers || {}),
+        };
+
+        if (state.token) {
+          headers.Authorization = `Bearer ${state.token}`;
+        }
+
+        const response = await fetch(`${API_BASE_URL}${path}`, {
+          ...options,
+          headers,
+        });
+
+        let payload = null;
+        const hasJson = (response.headers.get("content-type") || "").includes("application/json");
+        if (hasJson) {
+          payload = await response.json();
+        }
+
+        if (!response.ok) {
+          const apiMessage = payload?.message || `Error HTTP ${response.status}`;
+          if (response.status === 401) {
+            goToLogin("Sesión expirada o inválida. Vuelve a iniciar sesión.");
+          }
+          throw new Error(apiMessage);
+        }
+
+        return payload;
+      }
+
+      function ensureTokenNotExpired() {
+        if (!state.token) return false;
+        const exp = parseJwtExp(state.token);
+        if (exp && Date.now() > exp) {
+          goToLogin("Tu token JWT expiró (15 minutos). Inicia sesión nuevamente.");
+          return false;
+        }
+        return true;
+      }
+
+      function startOtpCountdown(expiresInSeconds) {
+        state.otpExpiresAt = Date.now() + expiresInSeconds * 1000;
+        if (state.otpTimer) clearInterval(state.otpTimer);
+
+        state.otpTimer = setInterval(() => {
+          const seconds = Math.max(0, Math.floor((state.otpExpiresAt - Date.now()) / 1000));
+          const m = String(Math.floor(seconds / 60)).padStart(2, "0");
+          const s = String(seconds % 60).padStart(2, "0");
+          otpCountdown.textContent = `OTP expira en ${m}:${s}`;
+
+          if (seconds <= 0) {
+            clearInterval(state.otpTimer);
+            state.otpTimer = null;
+            state.challengeId = "";
+            showMessage(loginMessage, "El OTP expiró. Solicita uno nuevo.", "error");
+            otpForm.classList.add("hidden");
+            loginForm.classList.remove("hidden");
+          }
+        }, 1000);
+      }
+
+      function setActiveTab(tab) {
+        state.activeTab = tab;
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.tab === tab);
+        });
+        document.getElementById("adminsSection").classList.toggle("hidden", tab !== "admins");
+        document.getElementById("businessesSection").classList.toggle("hidden", tab !== "businesses");
+      }
+
+      async function loadAdmins() {
+        const tbody = document.getElementById("adminsTbody");
+        tbody.innerHTML = "<tr><td colspan='4'>Cargando...</td></tr>";
+
+        const admins = await apiRequest("/platform/admins");
+
+        if (!admins.length) {
+          tbody.innerHTML = "<tr><td colspan='4'>Sin superadmins.</td></tr>";
+          return;
+        }
+
+        tbody.innerHTML = admins
+          .map(
+            (a) => `
+              <tr>
+                <td>${a.id}</td>
+                <td>${a.email}</td>
+                <td>${a.name}</td>
+                <td>
+                  <div class="actions">
+                    <button class="btn btn-danger" data-delete-admin="${a.id}">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            `
+          )
+          .join("");
+      }
+
+      async function loadBusinesses() {
+        const tbody = document.getElementById("businessesTbody");
+        tbody.innerHTML = "<tr><td colspan='6'>Cargando...</td></tr>";
+
+        const businesses = await apiRequest("/platform/businesses");
+
+        if (!businesses.length) {
+          tbody.innerHTML = "<tr><td colspan='6'>Sin businesses.</td></tr>";
+          return;
+        }
+
+        tbody.innerHTML = businesses
+          .map(
+            (b) => `
+            <tr>
+              <td>${b.id}</td>
+              <td>${b.name}</td>
+              <td>${b.slug}</td>
+              <td>${b.type}</td>
+              <td>
+                <span class="pill ${b.active ? "pill-active" : "pill-inactive"}">
+                  ${b.active ? "Activo" : "Inactivo"}
+                </span>
+              </td>
+              <td>
+                <div class="actions">
+                  <button class="btn btn-secondary" data-edit-business="${b.id}">Editar</button>
+                  <button class="btn ${b.active ? "btn-danger" : "btn-success"}" data-toggle-business="${b.id}" data-active="${b.active}">
+                    ${b.active ? "Desactivar" : "Activar"}
+                  </button>
+                  <button class="btn" data-create-business-admin="${b.id}">Crear admin</button>
+                </div>
+              </td>
+            </tr>
+          `
+          )
+          .join("");
+      }
+
+      async function loadAllData() {
+        if (!ensureTokenNotExpired()) return;
+        hideMessage(appMessage);
+        try {
+          await Promise.all([loadAdmins(), loadBusinesses()]);
+        } catch (error) {
+          showMessage(appMessage, error.message, "error");
+        }
+      }
+
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        hideMessage(loginMessage);
+
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        try {
+          const data = await apiRequest("/platform/auth/login", {
+            method: "POST",
+            body: JSON.stringify({ email, password }),
+          });
+
+          state.challengeId = data.challengeId;
+          loginForm.classList.add("hidden");
+          otpForm.classList.remove("hidden");
+          startOtpCountdown(data.expiresInSeconds || 300);
+          showMessage(loginMessage, data.message || "OTP enviado.", "success");
+        } catch (error) {
+          showMessage(loginMessage, error.message, "error");
+        }
+      });
+
+      otpForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        hideMessage(loginMessage);
+
+        const otp = document.getElementById("otp").value.trim();
+        if (!/^\d{6}$/.test(otp)) {
+          showMessage(loginMessage, "El OTP debe tener 6 dígitos.", "error");
+          return;
+        }
+
+        try {
+          const data = await apiRequest("/platform/auth/verify-otp", {
+            method: "POST",
+            body: JSON.stringify({ challengeId: state.challengeId, otp }),
+          });
+          saveToken(data.token);
+          loginView.classList.add("hidden");
+          appView.classList.remove("hidden");
+          if (state.otpTimer) {
+            clearInterval(state.otpTimer);
+            state.otpTimer = null;
+          }
+          await loadAllData();
+        } catch (error) {
+          showMessage(loginMessage, error.message, "error");
+        }
+      });
+
+      document.getElementById("backToLoginBtn").addEventListener("click", () => {
+        otpForm.classList.add("hidden");
+        loginForm.classList.remove("hidden");
+        state.challengeId = "";
+        if (state.otpTimer) {
+          clearInterval(state.otpTimer);
+          state.otpTimer = null;
+        }
+        hideMessage(loginMessage);
+      });
+
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        goToLogin();
+      });
+
+      document.getElementById("refreshAllBtn").addEventListener("click", loadAllData);
+      document.getElementById("reloadAdminsBtn").addEventListener("click", async () => {
+        try {
+          await loadAdmins();
+          showMessage(appMessage, "SuperAdmins recargados.", "success");
+        } catch (error) {
+          showMessage(appMessage, error.message, "error");
+        }
+      });
+
+      document.getElementById("reloadBusinessesBtn").addEventListener("click", async () => {
+        try {
+          await loadBusinesses();
+          showMessage(appMessage, "Businesses recargados.", "success");
+        } catch (error) {
+          showMessage(appMessage, error.message, "error");
+        }
+      });
+
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
+      });
+
+      document.getElementById("createAdminForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const form = e.currentTarget;
+        const formData = new FormData(form);
+
+        const payload = {
+          email: formData.get("email").toString().trim(),
+          name: formData.get("name").toString().trim(),
+          password: formData.get("password").toString(),
+        };
+
+        try {
+          await apiRequest("/platform/admins", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+          form.reset();
+          await loadAdmins();
+          showMessage(appMessage, "SuperAdmin creado correctamente.", "success");
+        } catch (error) {
+          showMessage(appMessage, error.message, "error");
+        }
+      });
+
+      document.getElementById("adminsTbody").addEventListener("click", async (e) => {
+        const btn = e.target.closest("button[data-delete-admin]");
+        if (!btn) return;
+        const adminId = btn.dataset.deleteAdmin;
+
+        if (!confirm("¿Seguro que quieres eliminar este SuperAdmin?")) return;
+
+        try {
+          await apiRequest(`/platform/admins/${adminId}`, { method: "DELETE" });
+          await loadAdmins();
+          showMessage(appMessage, "SuperAdmin eliminado.", "success");
+        } catch (error) {
+          showMessage(appMessage, error.message, "error");
+        }
+      });
+
+      document.getElementById("createBusinessForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const form = e.currentTarget;
+        const formData = new FormData(form);
+
+        const payload = {
+          name: formData.get("name").toString().trim(),
+          slug: formData.get("slug").toString().trim(),
+          type: formData.get("type").toString().trim(),
+          description: formData.get("description").toString().trim() || undefined,
+          address: formData.get("address").toString().trim() || undefined,
+          phone: formData.get("phone").toString().trim() || undefined,
+        };
+
+        try {
+          await apiRequest("/platform/businesses", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+          form.reset();
+          await loadBusinesses();
+          showMessage(appMessage, "Business creado correctamente.", "success");
+        } catch (error) {
+          showMessage(appMessage, error.message, "error");
+        }
+      });
+
+      document.getElementById("businessesTbody").addEventListener("click", async (e) => {
+        const editBtn = e.target.closest("button[data-edit-business]");
+        const toggleBtn = e.target.closest("button[data-toggle-business]");
+        const createBusinessAdminBtn = e.target.closest("button[data-create-business-admin]");
+
+        try {
+          if (editBtn) {
+            const businessId = editBtn.dataset.editBusiness;
+            const data = await apiRequest(`/platform/businesses/${businessId}`);
+            const form = document.getElementById("editBusinessForm");
+            form.id.value = data.id;
+            form.name.value = data.name || "";
+            form.type.value = data.type || "";
+            form.description.value = data.description || "";
+            form.address.value = data.address || "";
+            form.phone.value = data.phone || "";
+            document.getElementById("businessModal").classList.remove("hidden");
+          }
+
+          if (toggleBtn) {
+            const businessId = toggleBtn.dataset.toggleBusiness;
+            const isActive = toggleBtn.dataset.active === "true";
+            await apiRequest(`/platform/businesses/${businessId}/${isActive ? "deactivate" : "activate"}`, {
+              method: "PUT",
+            });
+            await loadBusinesses();
+            showMessage(appMessage, `Business ${isActive ? "desactivado" : "activado"}.`, "success");
+          }
+
+          if (createBusinessAdminBtn) {
+            const form = document.getElementById("createBusinessAdminForm");
+            form.reset();
+            form.businessId.value = createBusinessAdminBtn.dataset.createBusinessAdmin;
+            document.getElementById("businessAdminModal").classList.remove("hidden");
+          }
+        } catch (error) {
+          showMessage(appMessage, error.message, "error");
+        }
+      });
+
+      document.getElementById("closeBusinessModalBtn").addEventListener("click", () => {
+        document.getElementById("businessModal").classList.add("hidden");
+      });
+
+      document.getElementById("closeBusinessAdminModalBtn").addEventListener("click", () => {
+        document.getElementById("businessAdminModal").classList.add("hidden");
+      });
+
+      document.getElementById("editBusinessForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const form = e.currentTarget;
+        const id = form.id.value;
+
+        const payload = {
+          name: form.name.value.trim() || undefined,
+          type: form.type.value.trim() || undefined,
+          description: form.description.value.trim() || undefined,
+          address: form.address.value.trim() || undefined,
+          phone: form.phone.value.trim() || undefined,
+        };
+
+        try {
+          await apiRequest(`/platform/businesses/${id}`, {
+            method: "PUT",
+            body: JSON.stringify(payload),
+          });
+          document.getElementById("businessModal").classList.add("hidden");
+          await loadBusinesses();
+          showMessage(appMessage, "Business actualizado.", "success");
+        } catch (error) {
+          showMessage(appMessage, error.message, "error");
+        }
+      });
+
+      document.getElementById("createBusinessAdminForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const form = e.currentTarget;
+
+        const businessId = form.businessId.value;
+        const payload = {
+          email: form.email.value.trim(),
+          firstName: form.firstName.value.trim(),
+          lastName: form.lastName.value.trim(),
+          password: form.password.value,
+        };
+
+        try {
+          await apiRequest(`/platform/businesses/${businessId}/admin`, {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+          form.reset();
+          document.getElementById("businessAdminModal").classList.add("hidden");
+          showMessage(appMessage, "Admin del business creado correctamente.", "success");
+        } catch (error) {
+          showMessage(appMessage, error.message, "error");
+        }
+      });
+
+      function init() {
+        setActiveTab("admins");
+        hideMessage(loginMessage);
+        hideMessage(appMessage);
+
+        if (state.token && ensureTokenNotExpired()) {
+          loginView.classList.add("hidden");
+          appView.classList.remove("hidden");
+          loadAllData();
+        } else {
+          goToLogin();
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>
